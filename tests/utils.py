@@ -1,9 +1,19 @@
+import sys
+
 import numpy as np
 import mlx.core as mx
 import huggingface_hub
+import pytest
 
-AVAILABLE_STREAMS = [mx.cpu, mx.gpu]
-AVAILABLE_STREAMS_IDS = ["cpu", "gpu"]
+is_linux = sys.platform == "linux"
+skip_gpu_linux = pytest.mark.skipif(is_linux, reason="GPU not supported on Linux")
+
+if is_linux:
+    AVAILABLE_STREAMS = [mx.cpu]
+    AVAILABLE_STREAMS_IDS = ["cpu"]
+else:
+    AVAILABLE_STREAMS = [mx.cpu, mx.gpu]
+    AVAILABLE_STREAMS_IDS = ["cpu", "gpu"]
 PRECISIONS = [mx.float32, mx.float16]
 PRECISION_IDS = ["f32", "f16"]
 

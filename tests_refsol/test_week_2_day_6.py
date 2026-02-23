@@ -134,18 +134,22 @@ def test_task_1_flash_attention_with_mask_cpu_large():
     attention_helper(mx.cpu, 28, 4, 16, 128, 16, 3, use_flash_attention=True)
 
 
+@skip_gpu_linux
 def test_task_1_flash_attention_with_mask_gpu_extra_small():
     attention_helper(mx.gpu, 1, 1, 5, 7, 4, 1, use_flash_attention=True)
 
 
+@skip_gpu_linux
 def test_task_1_flash_attention_with_mask_gpu_small():
     attention_helper(mx.gpu, 6, 3, 2, 5, 3, 1, use_flash_attention=True)
 
 
+@skip_gpu_linux
 def test_task_1_flash_attention_with_mask_gpu():
     attention_helper(mx.gpu, 18, 6, 7, 5, 3, 10, use_flash_attention=True)
 
 
+@skip_gpu_linux
 def test_task_1_flash_attention_with_mask_gpu_large():
     attention_helper(mx.gpu, 28, 4, 16, 128, 16, 3, use_flash_attention=True)
 
@@ -162,18 +166,22 @@ def test_task_1_attention_with_mask_cpu_large():
     attention_helper(mx.cpu, 28, 4, 16, 128, 16, 3, use_flash_attention=False)
 
 
+@skip_gpu_linux
 def test_task_1_attention_with_mask_gpu_extra_small():
     attention_helper(mx.gpu, 1, 1, 5, 7, 4, 1, use_flash_attention=False)
 
 
+@skip_gpu_linux
 def test_task_1_attention_with_mask_gpu_small():
     attention_helper(mx.gpu, 6, 3, 2, 5, 3, 1, use_flash_attention=False)
 
 
+@skip_gpu_linux
 def test_task_1_attention_with_mask_gpu():
     attention_helper(mx.gpu, 18, 6, 7, 5, 3, 10, use_flash_attention=False)
 
 
+@skip_gpu_linux
 def test_task_1_attention_with_mask_gpu_large():
     attention_helper(mx.gpu, 28, 4, 16, 128, 16, 3, use_flash_attention=False)
 

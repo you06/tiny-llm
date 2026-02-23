@@ -50,21 +50,25 @@ def test_task_2_flash_attention_cpu_large(with_mask: bool):
     attention_helper(mx.cpu, 28, 4, 16, 128, 16, 3, with_mask)
 
 
+@skip_gpu_linux
 @pytest.mark.parametrize("with_mask", [False, True], ids=["no_mask", "mask"])
 def test_task_3_flash_attention_gpu_extra_small(with_mask: bool):
     attention_helper(mx.gpu, 1, 1, 5, 7, 4, 1, with_mask)
 
 
+@skip_gpu_linux
 @pytest.mark.parametrize("with_mask", [False, True], ids=["no_mask", "mask"])
 def test_task_3_flash_attention_gpu_small(with_mask: bool):
     attention_helper(mx.gpu, 6, 3, 2, 5, 3, 1, with_mask)
 
 
+@skip_gpu_linux
 @pytest.mark.parametrize("with_mask", [False, True], ids=["no_mask", "mask"])
 def test_task_3_flash_attention_gpu(with_mask: bool):
     attention_helper(mx.gpu, 18, 6, 7, 5, 3, 10, with_mask)
 
 
+@skip_gpu_linux
 @pytest.mark.parametrize("with_mask", [False, True], ids=["no_mask", "mask"])
 def test_task_3_flash_attention_gpu_large(with_mask: bool):
     attention_helper(mx.gpu, 28, 4, 16, 128, 16, 3, with_mask)
