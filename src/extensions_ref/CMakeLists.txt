@@ -25,6 +25,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
   OUTPUT_VARIABLE MLX_ROOT)
 find_package(MLX CONFIG REQUIRED)
+find_package(OpenMP)
 
 # ----------------------------- Extensions -----------------------------
 
@@ -45,6 +46,11 @@ target_include_directories(tiny_llm_ext_ref PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${C
 
 # Link to mlx
 target_link_libraries(tiny_llm_ext_ref PUBLIC mlx)
+
+# Link OpenMP if available
+if(OpenMP_CXX_FOUND)
+  target_link_libraries(tiny_llm_ext_ref PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # so that clangd can pick this up
 
@@ -82,5 +88,9 @@ nanobind_add_module(
 target_link_libraries(_ext PRIVATE tiny_llm_ext_ref)
 
 if(BUILD_SHARED_LIBS)
-  target_link_options(_ext PRIVATE -Wl,-rpath,@loader_path)
+  if(APPLE)
+    target_link_options(_ext PRIVATE -Wl,-rpath,@loader_path)
+  else()
+    target_link_options(_ext PRIVATE -Wl,-rpath,$ORIGIN)
+  endif()
 endif()

@@ -80,5 +80,9 @@ nanobind_add_module(
 target_link_libraries(_ext PRIVATE tiny_llm_ext)
 
 if(BUILD_SHARED_LIBS)
-  target_link_options(_ext PRIVATE -Wl,-rpath,@loader_path)
+  if(APPLE)
+    target_link_options(_ext PRIVATE -Wl,-rpath,@loader_path)
+  else()
+    target_link_options(_ext PRIVATE -Wl,-rpath,$ORIGIN)
+  endif()
 endif()

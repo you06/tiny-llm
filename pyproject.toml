@@ -8,7 +8,8 @@ version = "0.1.0"
 requires-python = ">=3.10, <3.13"
 readme = "README.md"
 dependencies = [
-    "mlx>=0.29.1",
+    "mlx>=0.29.1; sys_platform == 'darwin'",
+    "mlx[cpu]>=0.29.1; sys_platform == 'linux'",
     "torch>=2.6.0",
     "torchtune>=0.6.1",
     "torchao>=0.10.0",

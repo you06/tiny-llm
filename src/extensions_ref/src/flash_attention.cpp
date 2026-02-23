@@ -2,6 +2,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include "mlx/backend/common/utils.h"
 #include "mlx/backend/cpu/encoder.h"
 #include "mlx/utils.h"
@@ -109,6 +113,7 @@ void FlashAttention::eval_cpu(const std::vector<mx::array> &inputs, std::vector<
         const float *v_ptr = v.data<float>();
         const float *m_ptr = mask.data<float>();
 
+        #pragma omp parallel for
         for (int64_t n = 0; n < N; n++) {
             const float *q_batch = q_ptr + n * N_Q_HEAD;
             const float *k_batch = k_ptr + (n / q_kv_heads_ratio) * N_K_HEAD;
@@ -233,6 +238,7 @@ void FlashAttention::eval_cpu(const std::vector<mx::array> &inputs, std::vector<
 }
 
 void FlashAttention::eval_gpu(const std::vector<mx::array> &inputs, std::vector<mx::array> &outputs) {
+#ifdef _METAL_
     const auto &q = inputs[0];
     const auto &k = inputs[1];
     const auto &v = inputs[2];
@@ -261,7 +267,7 @@ void FlashAttention::eval_gpu(const std::vector<mx::array> &inputs, std::vector<
     compute_encoder.set_input_array(k, 1);
     compute_encoder.set_input_array(v, 2);
     compute_encoder.set_input_array(mask, 3);
-    compute_encoder.set_output_array(out, 4);    
+    compute_encoder.set_output_array(out, 4);
     compute_encoder.set_vector_bytes(mask.shape(), 5);
     compute_encoder.set_vector_bytes(mask.strides(), 6);
 
@@ -329,5 +335,8 @@ void FlashAttention::eval_gpu(const std::vector<mx::array> &inputs, std::vector<
     MTL::Size num_threads_per_group = MTL::Size(Br, simd_width, 1);
 
     compute_encoder.dispatch_threadgroups(num_threadgroups, num_threads_per_group);
+#else
+    throw std::runtime_error("FlashAttention has no GPU implementation without Metal.");
+#endif
 }
 }  // namespace tiny_llm_ext_ref

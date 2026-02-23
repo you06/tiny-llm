@@ -1,5 +1,9 @@
 #include <cstdint>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include "mlx/array.h"
 #include "mlx/device.h"
 #include "mlx/dtype.h"
@@ -110,6 +114,7 @@ void quantized_matmul_impl(const mx::array &scales, const mx::array &biases, con
         const float16_t *scales_ptr = scales.data<float16_t>();
         const float16_t *biases_ptr = biases.data<float16_t>();
         uint32_t item_mask = (1 << bits) - 1;
+        #pragma omp parallel for
         for (int i = 0; i < M; i++) {
             for (int k = 0; k < K; k++) {
                 float sum = 0;
@@ -178,6 +183,7 @@ void quantized_matmul_impl_typed(
 
         uint32_t pack_mask = (1 << bits) - 1;
 
+        #pragma omp parallel for
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < k; j++) {
                 float sum = 0;
@@ -238,6 +244,7 @@ void QuantizedMatmul::eval_cpu(const std::vector<mx::array> &inputs, std::vector
 }
 
 void QuantizedMatmul::eval_gpu(const std::vector<mx::array> &inputs, std::vector<mx::array> &outputs) {
+#ifdef _METAL_
     auto &scales = inputs[0];
     auto &biases = inputs[1];
     auto &a = inputs[2];
@@ -307,6 +314,9 @@ void QuantizedMatmul::eval_gpu(const std::vector<mx::array> &inputs, std::vector
     // Launch the grid with the given number of threads divided among
     // the given threadgroups
     compute_encoder.dispatch_threadgroups(num_threadgroups, num_threads_per_group);
+#else
+    throw std::runtime_error("QuantizedMatmul has no GPU implementation without Metal.");
+#endif
 }
 
 }  // namespace tiny_llm_ext_ref
