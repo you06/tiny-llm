@@ -64,18 +64,39 @@ class SimpleMultiHeadAttention:
 
 
 def causal_mask(L: int, S: int, dtype: mx.Dtype) -> mx.array:
-    pass
+    # query length = L, key/value length = S
+    mask = mx.triu(mx.full((L, S), float("-inf"), dtype=dtype), k = S - L + 1)
+    return mask
 
-
+# attention = softmax(QKt * scale + mask) V
 def scaled_dot_product_attention_grouped(
-    query: mx.array,
-    key: mx.array,
-    value: mx.array,
+    query: mx.array, # N.. x H_q x L x D
+    key: mx.array, # N.. x H x S x D
+    value: mx.array, # N.. x H x S x D
     scale: float | None = None,
-    mask: mx.array | str | None = None,
-) -> mx.array:
-    pass
+    mask: mx.array | str | None = None, # N.. x H_q x L x S
+) -> mx.array: # N.. x H_q x L x D
+    factor = mx.rsqrt(query.shape[-1]) if scale is None else scale
+    q = query.shape[-3] // key.shape[-3]
+    key = head_grouped(key, q)
+    value = head_grouped(value, q)
+    scores = (query @ key.swapaxes(-2, -1)) * factor
+    if mask is not None:
+        if isinstance(mask, str) and mask == "causal":
+            L, S = scores.shape[-2], scores.shape[-1]
+            mask = causal_mask(L, S, scores.dtype)
+        scores = scores + mask
 
+    return softmax(scores, axis=-1) @ value
+
+def head_grouped(x: mx.array, q: int) -> mx.array:
+    if q == 1:
+        return x
+    ret_shape = x.shape[:-3] + (x.shape[-3] * q,) + x.shape[-2:]
+    x = mx.expand_dims(x, axis=-3) # N.. x H x S x D -> N.. x H x 1 x S x D
+    x = mx.broadcast_to(x, x.shape[:-3] + (q,) + x.shape[-2:])
+    x = x.reshape(ret_shape)
+    return x
 
 def flash_attention(
     query: mx.array,
